@@ -1,3 +1,5 @@
 -r requirements/build.txt
 -r requirements/runtime.txt
--r requirements/tests.txt
+# -r requirements/tests.txt
+-r requirements/albu.txt
+-r requirements/ymir.txt
