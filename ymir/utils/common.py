@@ -185,13 +185,16 @@ def get_best_weight_file(cfg: edict) -> str:
     ]
 
     # choose weight file by priority, best_xxx.pth > latest.pth > epoch_xxx.pth
-    best_pth_files = [f for f in model_params_path if osp.basename(f).startswith('best_')]
+    best_pth_files = [f for f in model_params_path if osp.basename(f).startswith(('best_', 'bbox_mAP_'))]
     if len(best_pth_files) > 0:
         return max(best_pth_files, key=os.path.getctime)
 
     epoch_pth_files = [f for f in model_params_path if osp.basename(f).startswith(('epoch_', 'iter_'))]
     if len(epoch_pth_files) > 0:
         return max(epoch_pth_files, key=os.path.getctime)
+
+    if len(model_params_path) > 0:
+        return max(model_params_path, key=os.path.getctime)
 
     if cfg.ymir.run_training:
         weight_files = [f for f in glob.glob('/weights/**/*', recursive=True) if f.endswith(('.pth', '.pt'))]
