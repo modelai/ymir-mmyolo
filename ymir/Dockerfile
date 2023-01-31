@@ -23,11 +23,13 @@ RUN pip install openmim \
 COPY . /app
 RUN cd /app && \
     pip install --no-cache-dir -r requirements.txt && \
+    mkdir -p /img-man && \
+    mv ymir/img-man/*.yaml /img-man && \
     mkdir /weights && \
     mv ymir/weights/*.pth /weights
 
 ENV PYTHONPATH=.
 WORKDIR /app
 
-RUN echo "python3 ymir/start.py > /usr/bin/start.sh"
+RUN echo "python3 ymir/start.py" > /usr/bin/start.sh
 CMD bash /usr/bin/start.sh

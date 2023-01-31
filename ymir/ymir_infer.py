@@ -1,12 +1,9 @@
 import argparse
 import os
-import os.path as osp
 import sys
-import warnings
-from typing import Any, List
+from typing import List
 
 import cv2
-import numpy as np
 import torch.distributed as dist
 from easydict import EasyDict as edict
 from mmdet.apis import inference_detector, init_detector
@@ -15,7 +12,8 @@ from mmengine.config import DictAction
 from mmengine.dist import collect_results_gpu, init_dist
 from tqdm import tqdm
 from ymir_exc import result_writer as rw
-from ymir_exc.util import (YmirStage, get_merged_config, write_ymir_monitor_process)
+from ymir_exc.util import (YmirStage, get_merged_config,
+                           write_ymir_monitor_process)
 
 from mmyolo.utils import register_all_modules
 from ymir.utils.common import get_best_weight_file, get_config_file

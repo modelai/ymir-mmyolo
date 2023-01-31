@@ -56,7 +56,7 @@ youdaoyzbx/ymir-executor:ymir2.1.0-mmyolo-cu113-tmi
 | shm_size | 128G | 字符串| 受ymir后台处理，docker image 可用共享内存 | 建议大小：镜像占用GPU数 * 32G |
 | export_format | ark:raw | 字符串| 受ymir后台处理，ymir数据集导出格式 | - |
 | model_name | yolov8_n | 字符串 | 模型简写, 如yolov7_tiny, yolov5_m, yolov6_t, rtmdet_m, ppyoloe_plus_s | 支持yolov5-v8, yolox, rtmdet, ppyoloe_plus |
-| samples_per_gpu | 16 | 整数 | 每张GPU一次处理的图片数量 | 建议大小：显存占用<50% 可增加2倍加快训练速度 |
+| samples_per_gpu | 8 | 整数 | 每张GPU一次处理的图片数量 | 建议大小：显存占用<50% 可增加2倍加快训练速度 |
 | workers_per_gpu | 4 | 整数 | 每张GPU对应的数据读取进程数 | - |
 | max_epochs | 100 | 整数 | 整个数据集的训练遍历次数 | 建议：必要时分析tensorboard确定是否有必要改变，一般采用默认值即可 |
 | args_options | '' | 字符串 | 训练命令行参数 | 参考 [ymir-mmyolo/tools/train.py](https://github.com/modelai/ymir-mmyolo/blob/ymir/tools/train.py)
@@ -64,3 +64,19 @@ youdaoyzbx/ymir-executor:ymir2.1.0-mmyolo-cu113-tmi
 | metric | bbox | 字符串 | 模型评测方式 | 采用默认值即可 |
 | val_interval | 1 | 整数 | 模型在验证集上评测的周期， 以epoch为单位 | 设置为1，每个epoch可评测一次 |
 | max_keep_checkpoints | 1 | 整数 | 最多保存的权重文件数量 | 设置为k, 可保存k个最优权重和k个最新的权重文件，设置为-1可保存所有权重文件。
+
+
+## 推理参数
+
+| 超参数 | 默认值 | 类型 | 说明 | 建议 |
+| - | - | - | - | - |
+| hyper-parameter | default value | type | note | advice |
+| conf_threshold | 0.2 | 浮点数 | 推理结果置信度过滤阈值 | 设置为0可保存所有结果，设置为0.6可过滤大量结果 |
+
+## 挖掘参数
+
+| 超参数 | 默认值 | 类型 | 说明 | 建议 |
+| - | - | - | - | - |
+| hyper-parameter | default value | type | note | advice |
+| mining_algorithm | entropy | 字符串 | 挖掘算法可选 entropy 和 random | 建议采用entropy |
+| conf_threshold | 0.1 | 浮点数 | 推理结果置信度过滤阈值 | 设置为0可保存所有结果，设置为0.1可过滤一些推理结果，避免挖掘算法受低置信度结果影响 |

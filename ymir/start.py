@@ -7,9 +7,9 @@ from ymir_exc.util import find_free_port, get_merged_config
 
 def main():
     ymir_cfg = get_merged_config()
-    gpu_id: str = ymir_cfg.param.get('gpu_id', '0')
-    gpu_count: int = len(gpu_id.split(','))
-    port: int = find_free_port()
+    gpu_id = ymir_cfg.param.get('gpu_id', '0')
+    gpu_count = len(gpu_id.split(','))
+    port = find_free_port()
 
     logger = logging.getLogger()
     log_level = ymir_cfg.param.get('log_level', 'info')
