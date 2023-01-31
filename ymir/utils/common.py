@@ -101,6 +101,7 @@ def modify_mmengine_config(mmengine_cfg: Config, ymir_cfg: edict) -> None:
             mmengine_cfg.default_hooks.param_scheduler.total_epochs = max_epochs
     # modify checkpoint
     mmengine_cfg.default_hooks.checkpoint['out_dir'] = ymir_cfg.ymir.output.models_dir
+    mmengine_cfg.default_hooks.checkpoint['save_best'] = 'auto'
 
     # modify tensorboard
     tensorboard_logger = dict(type='TensorboardVisBackend', save_dir=ymir_cfg.ymir.output.tensorboard_dir)
