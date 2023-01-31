@@ -10,7 +10,8 @@ from typing import Dict, Optional, Union
 
 from mmengine.hooks import Hook
 from mmengine.registry import HOOKS
-from ymir_exc.util import (get_merged_config, write_ymir_monitor_process, write_ymir_training_result)
+from ymir_exc.util import (get_merged_config, write_ymir_monitor_process,
+                           write_ymir_training_result)
 
 
 @HOOKS.register_module()
@@ -46,7 +47,7 @@ class YmirTrainingMonitorHook(Hook):
         """
         if runner.rank in [0, -1]:
             N = len('coco/bbox_')
-            evaluation_result = {key[N:]: value for key, value in metrics.items()}
+            evaluation_result = {key[N:]: value for key, value in metrics.items()}  # type: ignore
             out_dir = self.ymir_cfg.ymir.output.models_dir
             cfg_files = glob.glob(osp.join(out_dir, '*.py'))
 
@@ -64,11 +65,12 @@ class YmirTrainingMonitorHook(Hook):
             else:
                 warnings.warn(f'no best checkpoint found on {runner.epoch}')
 
-            last_ckpts = glob.glob(osp.join(out_dir, '*.pth'))
-            if len(last_ckpts) > 0:
-                logging.info(f'epoch={runner.epoch}, save {newest_best_ckpt} to result.yaml')
+            latest_ckpts = glob.glob(osp.join(out_dir, '*.pth'))
+            if len(latest_ckpts) > 0:
+                last_ckpt = max(latest_ckpts, key=osp.getctime)
+                logging.info(f'epoch={runner.epoch}, save {last_ckpt} to result.yaml')
                 write_ymir_training_result(self.ymir_cfg,
-                                           files=last_ckpts + cfg_files,
+                                           files=[last_ckpt] + cfg_files,
                                            id='last',
                                            evaluation_result=evaluation_result)
             else:

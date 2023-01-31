@@ -54,7 +54,9 @@ def modify_mmengine_config(mmengine_cfg: Config, ymir_cfg: edict) -> None:
     mmengine_cfg.train_num_workers = workers_per_gpu
     mmengine_cfg.train_dataloader.batch_size = samples_per_gpu
     mmengine_cfg.train_dataloader.num_workers = workers_per_gpu
-    mmengine_cfg.optim_wrapper.optimizer.batch_size_per_gpu = samples_per_gpu
+
+    if 'batch_size_per_gpu' in mmengine_cfg.optim_wrapper.optimizer:
+        mmengine_cfg.optim_wrapper.optimizer.batch_size_per_gpu = samples_per_gpu
 
     # modify model output channel
     num_classes = len(ymir_cfg.param.class_names)
@@ -91,8 +93,12 @@ def modify_mmengine_config(mmengine_cfg: Config, ymir_cfg: edict) -> None:
         max_epochs = int(ymir_cfg.param.max_epochs)
         mmengine_cfg.train_cfg.max_epochs = max_epochs
         mmengine_cfg.max_epochs = max_epochs
-        mmengine_cfg.default_hooks.param_scheduler.max_epochs = max_epochs
 
+        param_scheduler_type = mmengine_cfg.default_hooks.param_scheduler.type
+        if param_scheduler_type == 'YOLOv5ParamSchedulerHook':
+            mmengine_cfg.default_hooks.param_scheduler.max_epochs = max_epochs
+        elif param_scheduler_type == 'PPYOLOEParamSchedulerHook':
+            mmengine_cfg.default_hooks.param_scheduler.total_epochs = max_epochs
     # modify checkpoint
     mmengine_cfg.default_hooks.checkpoint['out_dir'] = ymir_cfg.ymir.output.models_dir
 

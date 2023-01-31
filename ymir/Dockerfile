@@ -26,7 +26,9 @@ RUN cd /app && \
     mkdir -p /img-man && \
     mv ymir/img-man/*.yaml /img-man && \
     mkdir /weights && \
-    mv ymir/weights/*.pth /weights
+    mv ymir/weights/*.pth /weights && \
+    mkdir -p /root/.cache/torch/hub/checkpoints && \
+    mv ymir/weights/imagenet/*.pth /root/.cache/torch/hub/checkpoints
 
 ENV PYTHONPATH=.
 WORKDIR /app
