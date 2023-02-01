@@ -7,9 +7,11 @@ import os.path as osp
 from mmengine.config import Config, DictAction
 from mmengine.logging import print_log
 from mmengine.runner import Runner
+from ymir_exc.util import get_merged_config
 
 from mmyolo.registry import RUNNERS
 from mmyolo.utils import register_all_modules
+from ymir.utils.common import modify_mmengine_config
 
 
 def parse_args():
@@ -61,6 +63,8 @@ def main():
 
     # load config
     cfg = Config.fromfile(args.config)
+    ymir_cfg = get_merged_config()
+    modify_mmengine_config(cfg, ymir_cfg)
     # replace the ${key} with the value of cfg.key
     # cfg = replace_cfg_vals(cfg)
     cfg.launcher = args.launcher
