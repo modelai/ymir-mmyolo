@@ -52,7 +52,6 @@ youdaoyzbx/ymir-executor:ymir2.1.0-mmyolo-cu113-tmi
 | 超参数 | 默认值 | 类型 | 说明 | 建议 |
 | - | - | - | - | - |
 | hyper-parameter | default value | type | note | advice |
-| config_file |
 | shm_size | 128G | 字符串| 受ymir后台处理，docker image 可用共享内存 | 建议大小：镜像占用GPU数 * 32G |
 | export_format | ark:raw | 字符串| 受ymir后台处理，ymir数据集导出格式 | - |
 | model_name | yolov8_n | 字符串 | 模型简写, 如yolov7_tiny, yolov5_m, yolov6_t, rtmdet_m, ppyoloe_plus_s | 支持yolov5-v8, yolox, rtmdet, ppyoloe_plus |
