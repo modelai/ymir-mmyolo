@@ -41,7 +41,8 @@ class YmirTrainingMonitorHook(Hook):
 
     def after_val_epoch(self, runner, metrics: Optional[Dict[str, float]] = None) -> None:
         """
-        metrics: {'coco/bbox_mAP': 0.001, 'coco/bbox_mAP_50': 0.003, 'coco/bbox_mAP_75': 0.0, 'coco/bbox_mAP_s': 0.0, 'coco/bbox_mAP_m': 0.0, 'coco/bbox_mAP_l': 0.001}
+        metrics: {'coco/bbox_mAP': 0.001, 'coco/bbox_mAP_50': 0.003,
+        'coco/bbox_mAP_75': 0.0, 'coco/bbox_mAP_s': 0.0, 'coco/bbox_mAP_m': 0.0, 'coco/bbox_mAP_l': 0.001}
 
         evaluation_result: {'mAP': 0.001, 'mAP_50': 0.003, ...}
         """
@@ -50,6 +51,12 @@ class YmirTrainingMonitorHook(Hook):
             evaluation_result = {key[N:]: value for key, value in metrics.items()}  # type: ignore
             out_dir = self.ymir_cfg.ymir.output.models_dir
             cfg_files = glob.glob(osp.join(out_dir, '*.py'))
+
+            try:
+                test_cfg = runner.model.test_cfg
+                evaluate_config = dict(iou_thr=test_cfg.nms.iou_threshold, conf_thr=test_cfg.score_thr)
+            except (KeyError, AttributeError):
+                evaluate_config = None
 
             best_ckpts = glob.glob(osp.join(out_dir, 'best_coco', '*.pth'))
             if len(best_ckpts) > 0:
@@ -61,7 +68,8 @@ class YmirTrainingMonitorHook(Hook):
                     write_ymir_training_result(self.ymir_cfg,
                                                files=[newest_best_ckpt] + cfg_files,
                                                id='best',
-                                               evaluation_result=evaluation_result)
+                                               evaluation_result=evaluation_result,
+                                               evaluate_config=evaluate_config)
             else:
                 warnings.warn(f'no best checkpoint found on {runner.epoch}')
 
@@ -72,6 +80,7 @@ class YmirTrainingMonitorHook(Hook):
                 write_ymir_training_result(self.ymir_cfg,
                                            files=[last_ckpt] + cfg_files,
                                            id='last',
-                                           evaluation_result=evaluation_result)
+                                           evaluation_result=evaluation_result,
+                                           evaluate_config=evaluate_config)
             else:
                 warnings.warn(f'no latest checkpoint found on {runner.epoch}')

@@ -15,6 +15,7 @@ from ymir_exc.util import (YmirStage, get_merged_config,
 
 from mmyolo.utils import register_all_modules
 from ymir.utils.common import get_best_weight_file, get_config_file
+from ymir.ymir_infer import get_cfg_options
 
 LOCAL_RANK = int(os.getenv('LOCAL_RANK', -1))  # https://pytorch.org/docs/stable/elastic/run.html
 RANK = int(os.getenv('RANK', -1))
@@ -34,7 +35,8 @@ class RandomMiner(object):
         self.conf_threshold = float(cfg.param.conf_threshold)
         config_file = get_config_file(cfg)
         checkpoint_file = get_best_weight_file(cfg)
-        self.model = init_detector(config_file, checkpoint_file, device=f'cuda:{gpu_id}')
+        cfg_options = get_cfg_options(cfg)
+        self.model = init_detector(config_file, checkpoint_file, device=f'cuda:{gpu_id}', cfg_options=cfg_options)
 
     def infer(self, img):
         return inference_detector(self.model, img)

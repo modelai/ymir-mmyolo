@@ -1,1 +1,2 @@
 conf_threshold: 0.2
+iou_threshold: 0.65
