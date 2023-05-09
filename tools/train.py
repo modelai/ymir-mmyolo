@@ -10,7 +10,7 @@ from mmengine.runner import Runner
 from ymir_exc.util import get_merged_config
 
 from mmyolo.registry import RUNNERS
-from mmyolo.utils import register_all_modules
+from mmyolo.utils import is_metainfo_lower
 from ymir.utils.common import modify_mmengine_config
 
 
@@ -57,10 +57,6 @@ def parse_args():
 def main():
     args = parse_args()
 
-    # register all modules in mmdet into the registries
-    # do not init the default scope here because it will be init in the runner
-    register_all_modules(init_default_scope=False)
-
     # load config
     cfg = Config.fromfile(args.config)
     ymir_cfg = get_merged_config()
@@ -102,6 +98,9 @@ def main():
     elif args.resume is not None:
         cfg.resume = True
         cfg.load_from = args.resume
+
+    # Determine whether the custom metainfo fields are all lowercase
+    is_metainfo_lower(cfg)
 
     # build the runner from config
     if 'runner_type' not in cfg:
