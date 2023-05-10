@@ -23,7 +23,7 @@ RANK = int(os.getenv('RANK', -1))
 WORLD_SIZE = int(os.getenv('WORLD_SIZE', 1))
 
 
-def parse_option(cfg_options: str) -> dict:
+def get_cfg_options(cfg: edict) -> dict:
     parser = argparse.ArgumentParser(description='parse cfg options')
     parser.add_argument('--cfg-options',
                         nargs='+',
@@ -35,6 +35,9 @@ def parse_option(cfg_options: str) -> dict:
                         'Note that the quotation marks are necessary and that no white space '
                         'is allowed.')
 
+    iou_threshold = float(cfg.param.get('iou_threshold', 0.65))
+    score_thr = float(cfg.param.get('conf_threshold', 0.2))
+    cfg_options = f'model.test_cfg.nms.iou_threshold={iou_threshold} model.test_cfg.score_thr={score_thr}'
     args = parser.parse_args(f'--cfg-options {cfg_options}'.split())
     return args.cfg_options
 
@@ -69,8 +72,10 @@ class YmirModel:
         checkpoint_file = get_best_weight_file(cfg)
 
         gpu_id = max(0, RANK)
+        cfg_options = get_cfg_options(cfg)
+
         # build the model from a config file and a checkpoint file
-        self.model = init_detector(config_file, checkpoint_file, device=f'cuda:{gpu_id}')
+        self.model = init_detector(config_file, checkpoint_file, device=f'cuda:{gpu_id}', cfg_options=cfg_options)
 
     def infer(self, img):
         return inference_detector(self.model, img)

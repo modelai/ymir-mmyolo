@@ -44,7 +44,7 @@ def modify_mmengine_config(mmengine_cfg: Config, ymir_cfg: edict) -> None:
                         recursive_modify_attribute(cfg, attribute_key, attribute_value)
 
     # modify dataset config
-    data_info = convert_ymir_to_coco()
+    data_info = convert_ymir_to_coco(cat_id_from_zero=True)
 
     # validation may augment the image and use more gpu
     # so set smaller samples_per_gpu for validation
@@ -64,11 +64,10 @@ def modify_mmengine_config(mmengine_cfg: Config, ymir_cfg: edict) -> None:
     recursive_modify_attribute(mmengine_cfg.model, 'num_classes', num_classes)
 
     for split in ['train', 'val']:
-        ymir_dataset_cfg = dict(
-            type='YOLOv5CocoDataset',
-            ann_file=data_info[split]['ann_file'],
-            # metainfo=dict(classes=ymir_cfg.param.class_names),
-            data_root=ymir_cfg.ymir.input.root_dir)
+        ymir_dataset_cfg = dict(type='YOLOv5CocoDataset',
+                                ann_file=data_info[split]['ann_file'],
+                                metainfo=dict(classes=ymir_cfg.param.class_names),
+                                data_root=ymir_cfg.ymir.input.root_dir)
         # modify dataset config for `split`
 
         mmdet_dataset_cfg = mmengine_cfg[f'{split}_dataloader']['dataset']
@@ -128,9 +127,6 @@ def modify_mmengine_config(mmengine_cfg: Config, ymir_cfg: edict) -> None:
     max_keep_ckpts: int = int(ymir_cfg.param.get('max_keep_checkpoints', 1))
     mmengine_cfg.default_hooks.checkpoint.interval = val_interval
     mmengine_cfg.default_hooks.checkpoint.max_keep_ckpts = max_keep_ckpts
-
-    # TODO Whether to evaluating the AP for each class
-    # mmdet_cfg.evaluation.classwise = True
 
     # fix DDP error or make training faster?
     mmengine_cfg.find_unused_parameters = get_bool(ymir_cfg, 'find_unused_parameters', False)
@@ -262,10 +258,12 @@ def get_id_for_config_files() -> dict:
 
     py_files = glob.glob(osp.join('configs', '*', '*_coco.py'))
 
-    config_files = [f for f in py_files if f.split('/')[1] not in ['_base_', 'deploy']]
+    config_files = [f for f in py_files if f.split('/')[1] not in ['_base_', 'deploy', 'razor']]
+
+    det_config_files = [f for f in config_files if f.find('mask') == -1]
 
     id_dict: Dict[str, str] = {}
-    for f in config_files:
+    for f in det_config_files:
         f_name = osp.basename(f).replace('-', '_')
         splits = f_name.split('_')
 

@@ -5,8 +5,10 @@ import os.path as osp
 import re
 import subprocess
 import sys
+from pprint import pprint
 
 from easydict import EasyDict as edict
+from mmengine.config import Config
 from ymir_exc.dataset_convert import convert_ymir_to_coco
 from ymir_exc.util import (YmirStage, find_free_port, get_merged_config,
                            write_ymir_monitor_process,
@@ -41,10 +43,11 @@ def write_mmyolo_training_result(cfg: edict) -> None:
 
     assert len(log_files) > 0
     if len(log_files) > 1:
-        logging.info('too many log files found!!!')
+        logging.warning('too many log files found!!!')
 
+    log_file = max(log_files, key=osp.getctime)
     # only one log file
-    with open(log_files[-1], 'r') as fp:
+    with open(log_file, 'r') as fp:
         lines = fp.readlines()
 
     log_info_dict = {}
@@ -61,12 +64,17 @@ def write_mmyolo_training_result(cfg: edict) -> None:
     # skip the newest ckpt, note YmirTrainingMonitorHook will save newest ckpt.
     topk_best_ckpts = get_topk_checkpoints(best_ckpts, topk)[1:]
 
+    mmengine_cfg = Config.fromfile(cfg_files[0])
+    evaluate_config = dict(iou_thr=mmengine_cfg.model.test_cfg.nms.iou_threshold,
+                           conf_thr=mmengine_cfg.model.test_cfg.score_thr)
+
     for ckpt in topk_best_ckpts:
         epoch = int(re.findall(r'\d+', ckpt)[0])
         write_ymir_training_result(cfg,
                                    files=[ckpt] + cfg_files,
                                    id=f'best_{epoch}',
-                                   evaluation_result=log_info_dict[epoch])
+                                   evaluation_result=log_info_dict[epoch],
+                                   evaluate_config=evaluate_config)
 
     # save the last ckpt only, note YmirTrainingMonitorHook will save the last ckpt too.
     last_ckpt = max(glob.glob(osp.join(out_dir, 'epoch_*.pth')), key=osp.getctime)
@@ -74,7 +82,8 @@ def write_mmyolo_training_result(cfg: edict) -> None:
     write_ymir_training_result(cfg,
                                files=[last_ckpt] + cfg_files,
                                id='last',
-                               evaluation_result=log_info_dict[last_epoch])
+                               evaluation_result=log_info_dict[last_epoch],
+                               evaluate_config=evaluate_config)
 
 
 def main(cfg: edict) -> int:
@@ -87,12 +96,13 @@ def main(cfg: edict) -> int:
     logging.info(f'num_classes = {num_classes}')
 
     # convert dataset before ddp
-    data_info = convert_ymir_to_coco()
+    data_info = convert_ymir_to_coco(cat_id_from_zero=True)
     logging.info(f'convert dataset to {data_info}')
 
     # mmcv args config
     model_name = cfg.param.get("model_name")
     config_files_map = get_id_for_config_files()
+    # pprint(config_files_map)
     config_id = model_name.lower().replace('-', '_')
     config_file = config_files_map[config_id]
     # config_file = cfg.param.get("config_file")
@@ -142,6 +152,10 @@ def main(cfg: edict) -> int:
 
 
 if __name__ == '__main__':
+    logging.basicConfig(stream=sys.stdout,
+                        format='%(levelname)-8s: [%(asctime)s] %(message)s',
+                        datefmt='%Y%m%d-%H:%M:%S',
+                        level=logging.INFO)
     cfg = get_merged_config()
     os.environ.setdefault('PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION', 'python')
     sys.exit(main(cfg))
