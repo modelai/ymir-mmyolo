@@ -5,6 +5,7 @@ import os.path as osp
 import re
 import subprocess
 import sys
+from pprint import pprint
 
 from easydict import EasyDict as edict
 from mmengine.config import Config
@@ -42,10 +43,11 @@ def write_mmyolo_training_result(cfg: edict) -> None:
 
     assert len(log_files) > 0
     if len(log_files) > 1:
-        logging.info('too many log files found!!!')
+        logging.warning('too many log files found!!!')
 
+    log_file = max(log_files, key=osp.getctime)
     # only one log file
-    with open(log_files[-1], 'r') as fp:
+    with open(log_file, 'r') as fp:
         lines = fp.readlines()
 
     log_info_dict = {}
@@ -100,6 +102,7 @@ def main(cfg: edict) -> int:
     # mmcv args config
     model_name = cfg.param.get("model_name")
     config_files_map = get_id_for_config_files()
+    # pprint(config_files_map)
     config_id = model_name.lower().replace('-', '_')
     config_file = config_files_map[config_id]
     # config_file = cfg.param.get("config_file")
@@ -149,6 +152,10 @@ def main(cfg: edict) -> int:
 
 
 if __name__ == '__main__':
+    logging.basicConfig(stream=sys.stdout,
+                        format='%(levelname)-8s: [%(asctime)s] %(message)s',
+                        datefmt='%Y%m%d-%H:%M:%S',
+                        level=logging.INFO)
     cfg = get_merged_config()
     os.environ.setdefault('PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION', 'python')
     sys.exit(main(cfg))

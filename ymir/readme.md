@@ -1,5 +1,29 @@
 # mmyolo 镜像说明文档
 
+- 📘文档：[ymir-executor-doc](https://ymir-executor-fork.readthedocs.io/zh/latest/)
+
+- 🏠论坛：[issue](https://github.com/modelai/ymir-executor-fork/issues) 与 [discussion](https://github.com/modelai/ymir-executor-fork/discussions) 👉此处可反馈、提问、建议等。
+
+- 支持任务类型： 训练， 推理， 挖掘
+
+- 支持算法： yolov5/x/6/7/8, ppyoloe, rtmdet 目标检测算法
+
+- 版本信息 `python mmyolo/utils/collect_env.py`
+
+```
+Python: 3.8.12 (default, Oct 12 2021, 13:49:34)
+CUDA available: True
+PyTorch: 1.11.0
+CUDA Runtime: 11.3
+CuDNN: 8.2
+TorchVision: 0.12.0
+OpenCV: 4.7.0
+MMEngine: 0.7.3
+MMCV: 2.0.0
+MMDetection: 3.0.0
+MMYOLO: 0.5.0+31d9b34
+```
+
 ## 仓库地址
 
 > 参考[open-mmlab/mmyolo](https://github.com/open-mmlab/mmyolo)
@@ -8,6 +32,10 @@
 ## 镜像地址
 
 ```
+# mmyolov0.5.0
+youdaoyzbx/ymir-executor:ymir2.4.0-mmyolo-cu113-tmi
+
+# mmyolov0.4.0
 youdaoyzbx/ymir-executor:ymir2.1.0-mmyolo-cu113-tmi
 ```
 

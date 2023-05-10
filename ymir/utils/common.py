@@ -258,10 +258,12 @@ def get_id_for_config_files() -> dict:
 
     py_files = glob.glob(osp.join('configs', '*', '*_coco.py'))
 
-    config_files = [f for f in py_files if f.split('/')[1] not in ['_base_', 'deploy']]
+    config_files = [f for f in py_files if f.split('/')[1] not in ['_base_', 'deploy', 'razor']]
+
+    det_config_files = [f for f in config_files if f.find('mask') == -1]
 
     id_dict: Dict[str, str] = {}
-    for f in config_files:
+    for f in det_config_files:
         f_name = osp.basename(f).replace('-', '_')
         splits = f_name.split('_')
 
